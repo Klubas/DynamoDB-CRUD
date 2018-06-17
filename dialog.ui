@@ -27,74 +27,57 @@
        <item>
         <layout class="QFormLayout" name="formLayout">
          <property name="verticalSpacing">
-          <number>15</number>
+          <number>10</number>
          </property>
-         <item row="1" column="0">
+         <item row="0" column="0">
           <widget class="QLabel" name="label">
            <property name="text">
             <string>Nome</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leNome"/>
+         </item>
+         <item row="1" column="0">
           <widget class="QLabel" name="label_2">
            <property name="text">
             <string>Sobrenome</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
+         <item row="1" column="1">
           <widget class="QLineEdit" name="leSobrenome"/>
          </item>
-         <item row="3" column="0">
+         <item row="2" column="0">
           <widget class="QLabel" name="label_3">
            <property name="text">
             <string>Username</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="2" column="1">
           <widget class="QLineEdit" name="leUsername"/>
          </item>
-         <item row="4" column="0">
+         <item row="3" column="0">
           <widget class="QLabel" name="label_4">
            <property name="text">
             <string>email</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
+         <item row="3" column="1">
           <widget class="QLineEdit" name="leEmail"/>
          </item>
-         <item row="5" column="0">
+         <item row="4" column="0">
           <widget class="QLabel" name="label_5">
            <property name="text">
             <string>Tipo de Conta</string>
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
+         <item row="4" column="1">
           <widget class="QComboBox" name="cbConta"/>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="lbUUID">
-           <property name="text">
-            <string>UUID</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="leNome"/>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>UUID</string>
-           </property>
-          </widget>
          </item>
         </layout>
        </item>
@@ -106,9 +89,6 @@
          <property name="sizeConstraint">
           <enum>QLayout::SetMaximumSize</enum>
          </property>
-         <item>
-          <widget class="QWidget" name="widget_2" native="true"/>
-         </item>
          <item>
           <widget class="QPushButton" name="btnSalvar">
            <property name="text">
@@ -130,19 +110,6 @@
           <widget class="QPushButton" name="btnSair">
            <property name="text">
             <string>Sair</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QWidget" name="widget" native="true">
-           <property name="maximumSize">
-            <size>
-             <width>150</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="autoFillBackground">
-            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -207,7 +174,7 @@
    <item row="1" column="0">
     <widget class="QTableWidget" name="tblWidget">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>

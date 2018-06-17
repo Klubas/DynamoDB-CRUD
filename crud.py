@@ -11,23 +11,23 @@ dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('users')
 
 username_col = 0
-uuid_col = 1
+email_col = 1
 
-class UUID():
+class User():
     def __init__(self):
-        self.uuid = '0'
+        self.email = '0'
         
-    def getUUID(self):
-        return self.uuid
+    def getEmail(self):
+        return self.email
 
-    def setUUID(self, arg):
-        self.uuid = arg
+    def setEmail(self, arg):
+        self.email = arg
     
-    def resetUUID(self):
-        self.uuid = '0'
+    def resetEmail(self):
+        self.email = '0'
     
-    def isUUID(self):
-        if self.uuid == '0':
+    def isEmail(self):
+        if self.email == '0':
             return 0
         else: 
             return 1
@@ -49,8 +49,8 @@ class AppWindow(QDialog, Ui_Dialog):
     def __init__(self):
         super().__init__()
 
-        global uuid_sel
-        uuid_sel = UUID()
+        global user_sel
+        user_sel = User()
 
         self.setupUi(self)
 
@@ -70,17 +70,16 @@ class AppWindow(QDialog, Ui_Dialog):
         self.tblWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.updateTblVw()
 
-        self.lbUUID.setText(uuid_sel.getUUID())
         self.btnDel.setEnabled(0)
 
         self.showNormal()
 
 
     def preencherCampos(self):
-        uuid_sel.setUUID(self.tblWidget.item(self.tblWidget.currentRow(), uuid_col).text())
+        user_sel.setEmail(self.tblWidget.item(self.tblWidget.currentRow(), email_col).text())
 
         response = table.query(
-            KeyConditionExpression=Key('UUID').eq(uuid_sel.getUUID())
+            KeyConditionExpression=Key('email').eq(user_sel.getEmail())
         )
         items = response['Items'][0]  #"matriz tridimensional"
     
@@ -88,6 +87,8 @@ class AppWindow(QDialog, Ui_Dialog):
         self.leNome.setText(items['first_name'])
         self.leSobrenome.setText(items['last_name'])
         self.leEmail.setText(items['email'])
+
+        self.leEmail.setEnabled(0)
 
         self.btnSalvar.setText('Atualizar')
         self.btnDel.setEnabled(1)
@@ -98,17 +99,15 @@ class AppWindow(QDialog, Ui_Dialog):
             self.cbConta.setCurrentIndex(1)
         else:
             self.cbConta.setCurrentIndex(0)
-            
-        self.lbUUID.setText(uuid_sel.getUUID())
 
     
     def salvarItem(self):
     #testa se existe
         if (self.leNome.text() != '' and self.leEmail.text() != '' 
             and self.leSobrenome.text() != '' and self.leUsername.text() != ''):
-            if table.query(KeyConditionExpression=Key('UUID').eq(uuid_sel.getUUID()))['Items']:
+            if table.query(KeyConditionExpression=Key('email').eq(user_sel.getEmail()))['Items']:
                 self.update()
-            elif not uuid_sel.isUUID():
+            elif not user_sel.isEmail():
                 self.create()
             self.limpaCampos()
             self.updateTblVw()
@@ -116,11 +115,10 @@ class AppWindow(QDialog, Ui_Dialog):
     def create(self):
         table.put_item(
             Item={
-                'UUID': repr(datetime.datetime.now().timestamp()).replace(".", ""),
+                'email': self.leEmail.text(),
                 'username': self.leUsername.text(),
                 'first_name': self.leNome.text(),
                 'last_name': self.leSobrenome.text(),
-                'email': self.leEmail.text(),
                 'conta': self.cbConta.currentText()
             }
         )
@@ -148,14 +146,13 @@ class AppWindow(QDialog, Ui_Dialog):
 
     def update(self):
         table.update_item(
-            Key={'UUID': uuid_sel.getUUID()},
-            UpdateExpression='SET username = :val1 , first_name = :val2 , last_name = :val3 , conta = :val4 , email = :val5',
+            Key={'email': user_sel.getEmail()},
+            UpdateExpression='SET username = :val1 , first_name = :val2 , last_name = :val3 , conta = :val4',
             ExpressionAttributeValues={
                 ':val1': self.leUsername.text(),
                 ':val2': self.leNome.text(),
                 ':val3': self.leSobrenome.text(),
-                ':val4': self.cbConta.currentText(),
-                ':val5': self.leEmail.text()
+                ':val4': self.cbConta.currentText()
             }
         )
         """
@@ -184,7 +181,7 @@ class AppWindow(QDialog, Ui_Dialog):
             j = 0
             for i in response['Items']:
                 self.tblWidget.setItem(j ,username_col, QTableWidgetItem(i['username']))
-                self.tblWidget.setItem(j ,uuid_col , QTableWidgetItem(i['UUID']))
+                self.tblWidget.setItem(j ,email_col , QTableWidgetItem(i['email']))
                 j = j + 1
             
             self.tblWidget.sortItems(username_col, Qt.AscendingOrder)
@@ -193,15 +190,15 @@ class AppWindow(QDialog, Ui_Dialog):
             self.btnSalvar.setEnabled(0)
 
     def limpaCampos(self):
-        uuid_sel.resetUUID()
+        user_sel.resetEmail()
         self.leUsername.setText('')
         self.leNome.setText('')
         self.leSobrenome.setText('')
         self.leEmail.setText('')
         self.cbConta.setCurrentIndex(0)
-        self.lbUUID.setText(uuid_sel.getUUID())
         self.btnDel.setEnabled(0)
         self.btnSalvar.setText('Salvar')
+        self.leEmail.setEnabled(1)
     
     def nova_thread(self):
         self.threader('dynamo.py')
@@ -229,7 +226,7 @@ class AppWindow(QDialog, Ui_Dialog):
     def deleteTableItem(self):
         table.delete_item(
             Key={
-                'UUID': uuid_sel.getUUID()
+                'email': user_sel.getEmail()
             }
         )
         self.updateTblVw()

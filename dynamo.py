@@ -52,13 +52,13 @@ class Example(QWidget):
         TableName=nome,
         KeySchema=[
             {
-                'AttributeName': 'UUID',
+                'AttributeName': 'email',
                 'KeyType': 'HASH'
             }
         ],
         AttributeDefinitions=[
             {
-                'AttributeName': 'UUID',
+                'AttributeName': 'email',
                 'AttributeType': 'S'
             },
         ],
