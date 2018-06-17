@@ -190,7 +190,6 @@ class AppWindow(QDialog, Ui_Dialog):
         self.btnSalvar.setText('Salvar')
     
     def teste_tabela(self, arg1):
-
         while 'users' not in boto3.client('dynamodb').list_tables()['TableNames']:
             self.setEnabled(0)
         self.setEnabled(1)
