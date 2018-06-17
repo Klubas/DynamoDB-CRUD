@@ -189,7 +189,7 @@
      </column>
      <column>
       <property name="text">
-       <string>UUID</string>
+       <string>Email</string>
       </property>
      </column>
     </widget>

@@ -136,5 +136,5 @@ class Ui_Dialog(object):
         item = self.tblWidget.horizontalHeaderItem(0)
         item.setText(_translate("Dialog", "Username"))
         item = self.tblWidget.horizontalHeaderItem(1)
-        item.setText(_translate("Dialog", "UUID"))
+        item.setText(_translate("Dialog", "Email"))
 
