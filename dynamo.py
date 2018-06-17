@@ -26,6 +26,8 @@ class Example(QWidget):
         self.btnDel.setFixedSize(100, 20)
         self.btnDel.clicked.connect(self.deleteTable)
 
+        #self.btn = QInputDialog()
+
         self.teste()
 
         self.show()
@@ -35,8 +37,8 @@ class Example(QWidget):
             #_thread.start_new_thread(self.btnCreate.setEnabled, (0, ))
             self.btnCreate.setEnabled(0)
             sleep(5)
-            _thread.start_new_thread(self.thread_create_table, ('users', ))
-            _thread.start_new_thread(self.teste, ())
+            #_thread.start_new_thread(self.thread_create_table, ('users', ))
+            self.thread_create_table('users')
 
             # Wait until the table exists.
             table.meta.client.get_waiter('table_exists').wait(TableName='users')

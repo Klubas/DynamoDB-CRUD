@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import (QDialog, QApplication, QWidget, QPushButton, QLineE
 from PyQt5.QtCore import Qt
 from Ui_dialog import Ui_Dialog
 
-
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('users')
 
@@ -34,14 +33,16 @@ class UUID():
             return 1
 
 class myThread (threading.Thread):
-    def __init__(self, threadID, name):
+    def __init__(self, threadID, value):
         threading.Thread.__init__(self)
         self.threadID = threadID
-        self.name = name
+        self.value = value
+        self.returnCode = -1
     def run(self):
-        s = subprocess.Popen(["python", self.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        s = subprocess.Popen(["python", self.value])
         s.wait()
-        return s.returncode
+        self.returnCode = s.returncode
+
 
 class AppWindow(QDialog, Ui_Dialog):
 
@@ -189,7 +190,7 @@ class AppWindow(QDialog, Ui_Dialog):
             self.tblWidget.sortItems(username_col, Qt.AscendingOrder)
         else:
             self.tblWidget.clearContents()
-            self.nova_thread()
+            self.btnSalvar.setEnabled(0)
 
     def limpaCampos(self):
         uuid_sel.resetUUID()
@@ -208,16 +209,18 @@ class AppWindow(QDialog, Ui_Dialog):
     def threader(self, nome):
         try:
             ativo = self.isEnabled()
-            self.setEnabled(0)
+            self.btnSalvar.setEnabled(0)
             thread = myThread(0, nome)
-            s = thread.run()
+            thread.start()
+            while thread.is_alive(): pass
+            s = thread.returnCode
             print(s)
             if s == 2: #delete table
-                self.setEnabled(0)
+                self.btnSalvar.setEnabled(0)
             elif s == 1: #create table
-                self.setEnabled(1)
+                self.btnSalvar.setEnabled(1)
             else:   #exit
-                self.setEnabled(ativo)
+                self.btnSalvar.setEnabled(ativo)
             sleep(2)
             self.updateTblVw()
         except Exception as e:
