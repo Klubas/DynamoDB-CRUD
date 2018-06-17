@@ -196,7 +196,7 @@ class AppWindow(QDialog, Ui_Dialog):
 
     def nova_thread(self):
         self.setEnabled(0)
-        _thread.start_new_thread(subprocess.call, ("python dynamo.py",  ))
+        _thread.start_new_thread(subprocess.call, (["python", "dynamo.py" ],))
         _thread.start_new_thread(self.teste_tabela, ("",))
 
 
