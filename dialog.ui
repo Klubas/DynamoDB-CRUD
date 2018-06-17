@@ -107,6 +107,9 @@
           <enum>QLayout::SetMaximumSize</enum>
          </property>
          <item>
+          <widget class="QWidget" name="widget_2" native="true"/>
+         </item>
+         <item>
           <widget class="QPushButton" name="btnSalvar">
            <property name="text">
             <string>Salvar</string>
