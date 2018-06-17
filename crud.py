@@ -1,4 +1,7 @@
-import sys, subprocess, boto3, datetime, _thread
+import sys, subprocess, boto3, datetime, threading
+import subprocess
+from time import sleep
+from boto3 import resource
 from boto3.dynamodb.conditions import Key, Attr
 from PyQt5.QtWidgets import (QDialog, QApplication, QWidget, QPushButton, QLineEdit, QTableWidgetItem, QTableWidget, QAbstractItemView)
 from PyQt5.QtCore import Qt
@@ -30,6 +33,16 @@ class UUID():
         else: 
             return 1
 
+class myThread (threading.Thread):
+    def __init__(self, threadID, name):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+    def run(self):
+        s = subprocess.Popen(["python", self.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        s.wait()
+        return s.returncode
+
 class AppWindow(QDialog, Ui_Dialog):
 
     def __init__(self):
@@ -59,7 +72,7 @@ class AppWindow(QDialog, Ui_Dialog):
         self.lbUUID.setText(uuid_sel.getUUID())
         self.btnDel.setEnabled(0)
 
-        self.show()
+        self.showNormal()
 
 
     def preencherCampos(self):
@@ -90,13 +103,12 @@ class AppWindow(QDialog, Ui_Dialog):
     
     def salvarItem(self):
     #testa se existe
-        if self.leNome.text() != '' and self.leEmail.text() != '' and self.leSobrenome.text() != '' and self.leUsername.text() != '' :
-
+        if (self.leNome.text() != '' and self.leEmail.text() != '' 
+            and self.leSobrenome.text() != '' and self.leUsername.text() != ''):
             if table.query(KeyConditionExpression=Key('UUID').eq(uuid_sel.getUUID()))['Items']:
                 self.update()
             elif not uuid_sel.isUUID():
                 self.create()
-
             self.limpaCampos()
             self.updateTblVw()
     
@@ -176,6 +188,7 @@ class AppWindow(QDialog, Ui_Dialog):
             
             self.tblWidget.sortItems(username_col, Qt.AscendingOrder)
         else:
+            self.tblWidget.clearContents()
             self.nova_thread()
 
     def limpaCampos(self):
@@ -189,17 +202,26 @@ class AppWindow(QDialog, Ui_Dialog):
         self.btnDel.setEnabled(0)
         self.btnSalvar.setText('Salvar')
     
-    def teste_tabela(self, arg1):
-        while 'users' not in boto3.client('dynamodb').list_tables()['TableNames']:
-            self.setEnabled(0)
-        self.setEnabled(1)
-
     def nova_thread(self):
-        self.setEnabled(0)
-        _thread.start_new_thread(subprocess.call, (["python", "dynamo.py" ],))
-        _thread.start_new_thread(self.teste_tabela, ("",))
+        self.threader('dynamo.py')
 
-
+    def threader(self, nome):
+        try:
+            ativo = self.isEnabled()
+            self.setEnabled(0)
+            thread = myThread(0, nome)
+            s = thread.run()
+            print(s)
+            if s == 2: #delete table
+                self.setEnabled(0)
+            elif s == 1: #create table
+                self.setEnabled(1)
+            else:   #exit
+                self.setEnabled(ativo)
+            sleep(2)
+            self.updateTblVw()
+        except Exception as e:
+            print(e)
 
     def deleteTableItem(self):
         table.delete_item(
@@ -210,9 +232,8 @@ class AppWindow(QDialog, Ui_Dialog):
         self.updateTblVw()
         self.limpaCampos()
 
-    
     def sairApp(self):
-        sys.exit(app.exec_())
+        sys.exit()
 
 app = QApplication(sys.argv)
 w = AppWindow()

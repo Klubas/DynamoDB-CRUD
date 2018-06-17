@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import _thread
+from time import sleep
 from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QInputDialog, QApplication)
 import sys, boto3
 
@@ -31,41 +32,48 @@ class Example(QWidget):
         
     def createTable(self):
         try:
-            nome = 'users'
-            table = dynamodb.create_table(
-            TableName=nome,
-            KeySchema=[
-                {
-                    'AttributeName': 'UUID',
-                    'KeyType': 'HASH'
-                }
-            ],
-            AttributeDefinitions=[
-                {
-                    'AttributeName': 'UUID',
-                    'AttributeType': 'S'
-                },
-            ],
-            ProvisionedThroughput={
-                'ReadCapacityUnits': 5,
-                'WriteCapacityUnits': 5
-            }
-        )
+            #_thread.start_new_thread(self.btnCreate.setEnabled, (0, ))
+            self.btnCreate.setEnabled(0)
+            sleep(5)
+            _thread.start_new_thread(self.thread_create_table, ('users', ))
+            _thread.start_new_thread(self.teste, ())
 
             # Wait until the table exists.
-            table.meta.client.get_waiter('table_exists').wait(TableName=nome)
-
+            table.meta.client.get_waiter('table_exists').wait(TableName='users')
         except Exception as e:
             print(e)
-        self.sairApp()
+            self.teste()
+        self.sairApp(1)
 
+    def thread_create_table(self, nome):
+        table = dynamodb.create_table(
+        TableName=nome,
+        KeySchema=[
+            {
+                'AttributeName': 'UUID',
+                'KeyType': 'HASH'
+            }
+        ],
+        AttributeDefinitions=[
+            {
+                'AttributeName': 'UUID',
+                'AttributeType': 'S'
+            },
+        ],
+        ProvisionedThroughput={
+            'ReadCapacityUnits': 5,
+            'WriteCapacityUnits': 5
+        }
+    )
 
     def deleteTable(self):
         try:
             table.delete()
+            self.setEnabled(0)
         except Exception as e:
+            self.teste()
             print(e)
-        self.sairApp()
+        self.sairApp(2)
 
     def teste(self):
         if 'users' not in boto3.client('dynamodb').list_tables()['TableNames']:
@@ -73,8 +81,8 @@ class Example(QWidget):
         else:
             self.btnCreate.setEnabled(0)
 
-    def sairApp(self):
-        sys.exit(app.exec_())
+    def sairApp(self, code):
+        sys.exit(code)
         
     
 if __name__ == '__main__':
