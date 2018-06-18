@@ -15,7 +15,7 @@ email_col = 1
 
 class User():
     def __init__(self):
-        self.email = '0'
+        self.email = ''
         
     def getEmail(self):
         return self.email
@@ -24,13 +24,7 @@ class User():
         self.email = arg
     
     def resetEmail(self):
-        self.email = '0'
-    
-    def isEmail(self):
-        if self.email == '0':
-            return 0
-        else: 
-            return 1
+        self.email = ''
 
 class myThread (threading.Thread):
     def __init__(self, threadID, value):
@@ -107,7 +101,7 @@ class AppWindow(QDialog, Ui_Dialog):
             and self.leSobrenome.text() != '' and self.leUsername.text() != ''):
             if table.query(KeyConditionExpression=Key('email').eq(user_sel.getEmail()))['Items']:
                 self.update()
-            elif not user_sel.isEmail():
+            elif user_sel.getEmail() == '':
                 self.create()
             self.limpaCampos()
             self.updateTblVw()
