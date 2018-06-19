@@ -48,7 +48,11 @@ class Example(QWidget):
         self.sairApp(1)
 
     def deleteTable(self):
-        self.db.delete_table(self.table)
+        import boto3
+        table = boto3.resource('dynamodb').Table('users')
+        table.delete()
+        #self.db.delete_table(self.table)
+        #self.table.delete_table(self.table)
         self.sairApp(2)
     
     def backup(self):

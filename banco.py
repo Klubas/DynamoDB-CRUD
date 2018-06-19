@@ -59,7 +59,7 @@ class DataBase():
         try:
             return self.client.restore_table_from_backup(
                 TargetTableName='users'+datetime.datetime.now().ctime().replace(" ", "-").replace(":", "-"),
-                BackupArn='arn:aws:dynamodb:sa-east-1:447255449792:table/users/backup/01529388907897-09845ff4'
+                BackupArn='arn:aws:dynamodb:sa-east-1:447255449792:table/users/backup/01529389683057-27052fab'
             )
         except Exception:
             return -1
@@ -70,7 +70,7 @@ class DataBase():
             Limit=50,
             TimeRangeLowerBound=datetime.datetime(2018, 1, 1),
             TimeRangeUpperBound=datetime.datetime(2019, 1, 1)
-            #ExclusiveStartBackupArn='arn:aws:dynamodb:sa-east-1:447255449792:table/users/backup/01529388907897-09845ff4'
+            #ExclusiveStartBackupArn='arn:aws:dynamodb:sa-east-**'
         )
 
 
@@ -174,12 +174,17 @@ class Tabela():
         """
 
     def delete(self, arg):
+
+        response = self.table.delete_item(
+            Key={
+                self.key_name: arg
+            }
+        )
+        return response
+    
+    def delete_table(self, table):
         try:
-            response = self.table.delete_item(
-                Key={
-                    self.key_name: arg
-                }
-            )
-            return response
+            return table.delete()
         except Exception:
             return -1
+
