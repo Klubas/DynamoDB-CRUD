@@ -58,7 +58,7 @@ class DataBase():
     def restaura_backup(self):
         try:
             return self.client.restore_table_from_backup(
-                TargetTableName='users'+datetime.datetime.now().ctime().replace(" ", "-").replace(":", "-"),
+                TargetTableName='users', #+datetime.datetime.now().ctime().replace(" ", "-").replace(":", "-"),
                 #Arn deve ser dinamico para passar como argumento mas não da tempo de desenvolver isso
                 BackupArn='arn:aws:dynamodb:sa-east-1:447255449792:table/users/backup/01529389683057-27052fab'
             )
@@ -175,13 +175,15 @@ class Tabela():
         """
 
     def delete(self, arg):
-
-        response = self.table.delete_item(
-            Key={
-                self.key_name: arg
-            }
-        )
-        return response
+        try:
+            response = self.table.delete_item(
+                Key={
+                    self.key_name: arg
+                }
+            )
+            return response
+        except Exception:
+            return -1
     
     def delete_table(self, table):
         try:

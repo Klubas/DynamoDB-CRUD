@@ -17,6 +17,6 @@ Instalar Python3 e instalar Qt5
 # Configuração
 Precisa ter uma pasta .aws no diretório $HOME do sistema com os arquivos:
 
->$HOME/.aws/config
+> $HOME/.aws/config
 
->$HOME/.aws/credentials
+> $HOME/.aws/credentials

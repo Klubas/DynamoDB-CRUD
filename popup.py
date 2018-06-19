@@ -48,7 +48,7 @@ class Example(QWidget):
         self.sairApp(1)
 
     def deleteTable(self):
-        #Deve ser implementado de outra forma, acessando a clase DataBase()
+        #Deve ser implementado de outra forma, acessando a classe DataBase()
         #gambiarra
         import boto3
         table = boto3.resource('dynamodb').Table('users')
