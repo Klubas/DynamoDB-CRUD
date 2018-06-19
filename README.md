@@ -8,8 +8,7 @@ CRUD para Amazon DynamoDB escrito em python3.
 - boto3
 
 # Instalação de requisitos
-Baixar e instalar Python3
-Bixar e instalar Qt5
+Instalar Python3 e instalar Qt5
 
 > pip install pyqt5
 
