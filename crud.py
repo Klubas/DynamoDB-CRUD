@@ -1,50 +1,28 @@
-import sys, subprocess, boto3, datetime, threading
-import subprocess
+import datetime
+import sys
 from time import sleep
-from boto3 import resource
-from boto3.dynamodb.conditions import Key, Attr
-from PyQt5.QtWidgets import (QDialog, QApplication, QWidget, QPushButton, QLineEdit, QTableWidgetItem, QTableWidget, QAbstractItemView)
-from PyQt5.QtCore import Qt
-from Ui_dialog import Ui_Dialog
+from user import User
+from banco import DataBase, Tabela
 
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('users')
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QDialog,
+                             QLineEdit, QPushButton, QTableWidget,
+                             QTableWidgetItem, QWidget)
+
+from my_thread import myThread
+from Ui_dialog import Ui_Dialog
 
 username_col = 0
 email_col = 1
-
-class User():
-    def __init__(self):
-        self.email = ''
-        
-    def getEmail(self):
-        return self.email
-
-    def setEmail(self, arg):
-        self.email = arg
-    
-    def resetEmail(self):
-        self.email = ''
-
-class myThread (threading.Thread):
-    def __init__(self, threadID, value):
-        threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.value = value
-        self.returnCode = -1
-    def run(self):
-        s = subprocess.Popen(["python", self.value])
-        s.wait()
-        self.returnCode = s.returncode
-
 
 class AppWindow(QDialog, Ui_Dialog):
 
     def __init__(self):
         super().__init__()
 
-        global user_sel
-        user_sel = User()
+        self.db = DataBase()
+        self.dbtable = Tabela('users', 'email', self.db)
+        self.user_sel = User()
 
         self.setupUi(self)
 
@@ -68,123 +46,74 @@ class AppWindow(QDialog, Ui_Dialog):
 
         self.showNormal()
 
-
     def preencherCampos(self):
-        user_sel.setEmail(self.tblWidget.item(self.tblWidget.currentRow(), email_col).text())
+        email_sel = self.tblWidget.item(self.tblWidget.currentRow(), email_col).text()
 
-        response = table.query(
-            KeyConditionExpression=Key('email').eq(user_sel.getEmail())
-        )
-        items = response['Items'][0]  #"matriz tridimensional"
-    
-        self.leUsername.setText(items['username'])
-        self.leNome.setText(items['first_name'])
-        self.leSobrenome.setText(items['last_name'])
-        self.leEmail.setText(items['email'])
+        self.user_sel = self.dbtable.query_data_table(email_sel)  
+
+        self.leUsername.setText(self.user_sel.username)
+        self.leNome.setText(self.user_sel.first_name)
+        self.leSobrenome.setText(self.user_sel.last_name)
+        self.leEmail.setText(self.user_sel.email)
 
         self.leEmail.setEnabled(0)
-
-        self.btnSalvar.setText('Atualizar')
         self.btnDel.setEnabled(1)
-
-        if items['conta'] == "ADMIN":
+        self.btnSalvar.setText('Atualizar')
+        
+        if self.user_sel.conta == "ADMIN":
             self.cbConta.setCurrentIndex(2)
-        elif items['conta'] == "USUARIO":
+        elif self.user_sel.conta == "USUARIO":
             self.cbConta.setCurrentIndex(1)
         else:
             self.cbConta.setCurrentIndex(0)
-
     
     def salvarItem(self):
     #testa se existe
-        if (self.leNome.text() != '' and self.leEmail.text() != '' 
-            and self.leSobrenome.text() != '' and self.leUsername.text() != ''):
-            if table.query(KeyConditionExpression=Key('email').eq(user_sel.getEmail()))['Items']:
-                self.update()
-            elif user_sel.getEmail() == '':
-                self.create()
+        if self.leNome.text() != '' and self.leEmail.text() != '' and self.leSobrenome.text() != '' and self.leUsername.text() != '' :
+            
+            self.user_sel = self.dbtable.query_data_table(self.user_sel.email)
+
+            self.user_sel.username = self.leUsername.text()
+            self.user_sel.first_name = self.leNome.text()
+            self.user_sel.last_name = self.leSobrenome.text()
+            self.user_sel.conta = self.cbConta.currentText()
+
+            if self.user_sel.emailVazio():
+                self.user_sel.email = self.leEmail.text()
+                if self.dbtable.create(self.user_sel) == -2:
+                    return
+            elif not self.leEmail.isEnabled():
+                if self.dbtable.update(self.user_sel) == -1:
+                    return
+
             self.limpaCampos()
             self.updateTblVw()
     
-    def create(self):
-        table.put_item(
-            Item={
-                'email': self.leEmail.text(),
-                'username': self.leUsername.text(),
-                'first_name': self.leNome.text(),
-                'last_name': self.leSobrenome.text(),
-                'conta': self.cbConta.currentText()
-            }
-        )
-        """   SINTAXE DO DYNAMODB    
-        {
-            TableName: "Music",
-            Item: {
-                "Artist":"No One You Know",
-                "SongTitle":"Call Me Today",
-                "AlbumTitle":"Somewhat Famous",
-                "Year": 2015,
-                "Price": 2.14,
-                "Genre": "Country",
-                "Tags": {
-                    "Composers": [
-                        "Smith",
-                        "Jones",
-                        "Davis"
-                    ],
-                    "LengthInSeconds": 214
-                }
-            }
-        }
-        """
-
-    def update(self):
-        table.update_item(
-            Key={'email': user_sel.getEmail()},
-            UpdateExpression='SET username = :val1 , first_name = :val2 , last_name = :val3 , conta = :val4',
-            ExpressionAttributeValues={
-                ':val1': self.leUsername.text(),
-                ':val2': self.leNome.text(),
-                ':val3': self.leSobrenome.text(),
-                ':val4': self.cbConta.currentText()
-            }
-        )
-        """
-        {
-            TableName: "Music",
-            Key: {
-                "Artist":"No One You Know",
-                "SongTitle":"Call Me Today"
-            },
-            UpdateExpression: "SET RecordLabel = :label",
-            ExpressionAttributeValues: { 
-                ":label": "Global Records"
-            }
-        }
-        """
+    def deleteTableItem(self):
+        self.dbtable.delete(self.user_sel.email)
+        self.updateTblVw()
+        self.limpaCampos()
 
     def updateTblVw(self):
-        if 'users' in boto3.client('dynamodb').list_tables()['TableNames']:
-            response = table.scan(
-                FilterExpression=Attr('conta').ne('0')
-            )
-
+        if 'users' in self.db.tabelas():
+            response = self.dbtable.scan_ne('conta', 0)
             self.tblWidget.setRowCount(len(response['Items']))
             self.tblWidget.setColumnCount(2)
     
             j = 0
             for i in response['Items']:
-                self.tblWidget.setItem(j ,username_col, QTableWidgetItem(i['username']))
-                self.tblWidget.setItem(j ,email_col , QTableWidgetItem(i['email']))
+                self.tblWidget.setItem(j, username_col, QTableWidgetItem(i['username']))
+                self.tblWidget.setItem(j, email_col , QTableWidgetItem(i['email']))
                 j = j + 1
             
             self.tblWidget.sortItems(username_col, Qt.AscendingOrder)
+            self.user_sel = User()
         else:
             self.tblWidget.clearContents()
             self.btnSalvar.setEnabled(0)
 
     def limpaCampos(self):
-        user_sel.resetEmail()
+        self.user_sel = User()
         self.leUsername.setText('')
         self.leNome.setText('')
         self.leSobrenome.setText('')
@@ -193,15 +122,12 @@ class AppWindow(QDialog, Ui_Dialog):
         self.btnDel.setEnabled(0)
         self.btnSalvar.setText('Salvar')
         self.leEmail.setEnabled(1)
-    
-    def nova_thread(self):
-        self.threader('dynamo.py')
 
-    def threader(self, nome):
+    def nova_thread(self, nome):
         try:
             ativo = self.isEnabled()
             self.btnSalvar.setEnabled(0)
-            thread = myThread(0, nome)
+            thread = myThread(0, 'popup.py')
             thread.start()
             while thread.is_alive(): pass
             s = thread.returnCode
@@ -216,15 +142,6 @@ class AppWindow(QDialog, Ui_Dialog):
             self.updateTblVw()
         except Exception as e:
             print(e)
-
-    def deleteTableItem(self):
-        table.delete_item(
-            Key={
-                'email': user_sel.getEmail()
-            }
-        )
-        self.updateTblVw()
-        self.limpaCampos()
 
     def sairApp(self):
         sys.exit()
