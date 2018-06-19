@@ -59,6 +59,7 @@ class DataBase():
         try:
             return self.client.restore_table_from_backup(
                 TargetTableName='users'+datetime.datetime.now().ctime().replace(" ", "-").replace(":", "-"),
+                #Arn deve ser dinamico para passar como argumento mas não da tempo de desenvolver isso
                 BackupArn='arn:aws:dynamodb:sa-east-1:447255449792:table/users/backup/01529389683057-27052fab'
             )
         except Exception:
