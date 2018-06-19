@@ -122,7 +122,8 @@ class AppWindow(QDialog, Ui_Dialog):
         self.btnDel.setEnabled(0)
         self.btnSalvar.setText('Salvar')
         self.leEmail.setEnabled(1)
-
+        
+  #esse procedimento é pura e completa gambiarra
     def nova_thread(self, nome):
         try:
             ativo = self.isEnabled()
