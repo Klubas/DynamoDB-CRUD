@@ -1,16 +1,18 @@
 import datetime
 import sys
+sys.path.append('..')
+
 from time import sleep
-from user import User
-from banco import DataBase, Tabela
+from model.user import User
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QDialog,
                              QLineEdit, QPushButton, QTableWidget,
                              QTableWidgetItem, QWidget)
 
-from my_thread import myThread
-from Ui_dialog import Ui_Dialog
+from model.banco import DataBase, Tabela
+from model.my_thread import myThread
+from view.Ui_dialog import Ui_Dialog
 
 username_col = 0
 email_col = 1
@@ -147,6 +149,3 @@ class AppWindow(QDialog, Ui_Dialog):
     def sairApp(self):
         sys.exit()
 
-app = QApplication(sys.argv)
-w = AppWindow()
-sys.exit(app.exec_())

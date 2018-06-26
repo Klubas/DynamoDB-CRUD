@@ -1,6 +1,8 @@
 import sys
+sys.path.append('..')
+
 import datetime
-from user import User
+from model.user import User
 
 import boto3
 from boto3.dynamodb.conditions import Attr, Key

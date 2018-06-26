@@ -1,6 +1,9 @@
-from banco import DataBase, Tabela
-from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QInputDialog, QApplication)
 import sys
+sys.path.append('..')
+
+from model.banco import DataBase, Tabela
+from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit, QInputDialog, QApplication)
+
 
 class Example(QWidget):
     
